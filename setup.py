@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-import sys
 import os
+import sys
 
 if sys.version > '3':
     PY3 = True
@@ -60,18 +60,20 @@ def pkgconfig(*packages):
 lua_pkgconfig = pkgconfig('lua' + LUAVERSION, 'python-' + PYTHONVERSION)
 lua_pkgconfig['extra_compile_args'] = ['-I/usr/include/lua'+LUAVERSION]
 
-setup(name="lunatic-python",
-      version="1.0",
+setup(name="lunatic-python-universal",
+      version="2.0.0",
       description="Two-way bridge between Python and Lua",
       author="Gustavo Niemeyer",
       author_email="gustavo@niemeyer.net",
-      url="http://labix.org/lunatic-python",
+      url="https://github.com/OddSource/lunatic-python",
       license="LGPL",
       long_description="""\
 Lunatic Python is a two-way bridge between Python and Lua, allowing these
 languages to intercommunicate. Being two-way means that it allows Lua inside
 Python, Python inside Lua, Lua inside Python inside Lua, Python inside Lua
-inside Python, and so on.
+inside Python, and so on. This package is a fork of the original from
+http://labix.org/lunatic-python, updated to support Python 3, and forked
+again from https://github.com/bastibe/lunatic-python to release to PyPi.
 """,
       ext_modules=[
         Extension("lua-python",

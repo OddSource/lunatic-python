@@ -1,0 +1,5 @@
+DIST
+*.egg*
+MANIFEST
+.idea
+*.iml
