@@ -114,6 +114,7 @@ script:
   - cd ./build/bin
   - python ../../tests/test_python_in_lua_in_python.py
   - ${LUA_ENV} ../../tests/test_python_in_lua.lua
+  - cd ../../
 
 deploy:
   provider: pypi
@@ -121,8 +122,8 @@ deploy:
   password:
     # travis encrypt -r OddSource/lunatic-python [password]
     secure: ecfWU65HQcV2xTdRCVbwxtx9/uIXnIrl+A7qAgRpW8W3Q7vEQxLJWC3QNclHEqHDb9iijQDprkxA0uolRPYk4FkDR2rvIVeW8MJ3uobSIljPIkyqa3DEsHJyZnxYY1n2F2GkunntjiJkn+FSb+KX/lyy2DSKUamxeyLzksSMIgnoOkrSowQRHauJnPo1efaCiBy3sM0g/v0bmR1TJup6r4zieJs2I2y8Z8EB9WgV2/rf/VAqWZFk1/UYm+kuvtnkNTi3+TqbjfSjYERE4wZqrjIzMx4mkvyX+jIDVuqp/XlFQ8Rtv0pb5VPjVD7eATvvab1jctgnE52Zzc0RBR2j/ymSqm6Y962bTkbE5UBa+mLasq8e/y6v+FGGSOrG5YaQHbqmJAO4beETBErEOjkMhntgxBu9Lov2H0UZCl1Qpo/y4akMJzqQiOGIU0BIEUw35K/TQANXXy1RI+9i3hhho/PwSMnCBaHUKBP3QABr7oHbQYcHdPOKDfN86x9oTRLQeUfSd/THVSGbKcxZ/MTc/A72T5gWhcpswzAHBoV+6boJxIaxm8XY8uVDc6sbBLnr2B5RO+NjL16SbSpAdUg6qZUWERoeLRzCbP5yQVkVuI5K6wcKj0/e29Suq/LmfHbESFXm7tLsypvT7th2zM0kkQsNjjW7Yx8sNI9eDoVRSBc=
-  distributions: "sdist"
+  distributions: 'sdist'
   on:
     tags: true
-    env: LUA_ENV=lua5.2
+    condition: '$LUA_ENV == lua5.2'
     python: '3.6'
