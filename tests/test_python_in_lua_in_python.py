@@ -60,7 +60,7 @@ True
 
 >>> def show(key, value):
 ...   print("key is %s and value is %s" % (repr(key), repr(value)))
-... 
+...
 >>> asfunc = lua.eval("python.asfunc")
 >>> asfunc
 <Lua function at 0x...>
@@ -75,11 +75,12 @@ key is 'c' and value is 3...
 
 """
 
-import sys, os
+import os
+import sys
 sys.path.append(os.getcwd())
 
 
-class MyClass:
+class MyClass(object):
     def __repr__(self): return '<MyClass>'
 
 obj = MyClass()
