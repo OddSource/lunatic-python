@@ -1,34 +1,128 @@
-language: c
-
-sudo: required
+language: python
+sudo: false
 dist: trusty
-
-compiler:
-  - gcc
-
-env:
-  - LUA_ENV=lua5.1  PY_ENV=python2.7    m_SUFFIX=
-  - LUA_ENV=lua5.3  PY_ENV=python2.7    m_SUFFIX=
-  - LUA_ENV=lua5.1  PY_ENV=python3.6    m_SUFFIX=m
-  - LUA_ENV=lua5.3  PY_ENV=python3.6    m_SUFFIX=m
-
-
-before_install:
-  - sudo add-apt-repository -y "deb http://ppa.launchpad.net/grilo-team/travis/ubuntu trusty main"
-  - sudo add-apt-repository -y "deb http://ppa.launchpad.net/fkrull/deadsnakes/ubuntu trusty main"
-  - sudo apt-get update -qq
+matrix:
+  include:
+    - env: LUA_ENV=lua5.1
+      python: '2.7'
+      addons:
+        apt:
+          packages:
+            - lua5.1
+            - liblua5.1-dev
+    - env: LUA_ENV=lua5.1
+      python: '3.4'
+      addons:
+        apt:
+          packages:
+            - lua5.1
+            - liblua5.1-dev
+    - env: LUA_ENV=lua5.1
+      python: '3.5'
+      addons:
+        apt:
+          packages:
+            - lua5.1
+            - liblua5.1-dev
+    - env: LUA_ENV=lua5.1
+      python: '3.6'
+      addons:
+        apt:
+          packages:
+            - lua5.1
+            - liblua5.1-dev
+    - env: LUA_ENV=lua5.2
+      python: '2.7'
+      addons:
+        apt:
+          packages:
+            - lua5.2
+            - liblua5.2-dev
+    - env: LUA_ENV=lua5.2
+      python: '3.4'
+      addons:
+        apt:
+          packages:
+            - lua5.2
+            - liblua5.2-dev
+    - env: LUA_ENV=lua5.2
+      python: '3.5'
+      addons:
+        apt:
+          packages:
+            - lua5.2
+            - liblua5.2-dev
+    - env: LUA_ENV=lua5.2
+      python: '3.6'
+      addons:
+        apt:
+          packages:
+            - lua5.2
+            - liblua5.2-dev
+    # - env: LUA_ENV=lua5.3         TODO after xenial is available
+    #   python: '2.7'
+    #   addons:
+    #     apt:
+    #       packages:
+    #         - lua5.3
+    #         - liblua5.3-dev
+    # - env: LUA_ENV=lua5.3
+    #   python: '3.4'
+    #   addons:
+    #     apt:
+    #       packages:
+    #         - lua5.3
+    #         - liblua5.3-dev
+    # - env: LUA_ENV=lua5.3
+    #   python: '3.5'
+    #   addons:
+    #     apt:
+    #       packages:
+    #         - lua5.3
+    #         - liblua5.3-dev
+    # - env: LUA_ENV=lua5.3
+    #   python: '3.6'
+    #   addons:
+    #     apt:
+    #       packages:
+    #         - lua5.3
+    #         - liblua5.3-dev
 
 install:
-  - sudo apt-get install -qq --force-yes ${LUA_ENV}
-  - sudo apt-get install -qq --force-yes ${PY_ENV}
-  - sudo apt-get install -qq --force-yes lib${LUA_ENV}-dev
-  - sudo apt-get install -qq --force-yes lib${PY_ENV}-dev
-  - ${LUA_ENV} -v
-  - ${PY_ENV} --version
+  - export m_SUFFIX=""
+  - if [[ $TRAVIS_PYTHON_VERSION != 2.7 ]]; then export m_SUFFIX="m"; fi
+  - export PYTHON_PREFIX="$(python-config --prefix)"
+  - export PKG_CONFIG_PATH="${PYTHON_PREFIX}/lib/pkgconfig:$PKG_CONFIG_PATH"
+  - echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH"
+  - export PYTHON_INCLUDE="$PYTHON_PREFIX/include/python${TRAVIS_PYTHON_VERSION}${m_SUFFIX}"
+  - echo "PYTHON_INCLUDE=$PYTHON_INCLUDE"
+  - export PYTHON_LIBRARY="$(pkg-config --libs python-${TRAVIS_PYTHON_VERSION} | cut -c 3-9999 | cut -d " " -f 1)/libpython${TRAVIS_PYTHON_VERSION}${m_SUFFIX}.so"
+  - echo "PYTHON_LIBRARY=$PYTHON_LIBRARY"
+  - pip install -U pip setuptools
 
 script:
-  - cmake -B./build -H. -DPYTHON_INCLUDE_DIR=/usr/include/${PY_ENV}${m_SUFFIX} -DPYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/lib${PY_ENV}${m_SUFFIX}.so
+  - ${LUA_ENV} -v
+  - pip install -vvv -e .
+  - ls -al
+  - python -m tests.test_lua_in_python
+
+  - echo "Now we test the lua-in-python-in-lua and python-in-lua-in-python modes"
+  - ls -al $PYTHON_INCLUDE/Python.h
+  - ls -al $PYTHON_LIBRARY
+  - cmake -B./build -H. -DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE} -DPYTHON_LIBRARY=${PYTHON_LIBRARY}
   - cmake --build ./build
   - cd ./build/bin
-  - ${PY_ENV} ../../tests/test_lua.py
-  - ${LUA_ENV} ../../tests/test_py.lua
+  - python ../../tests/test_python_in_lua_in_python.py
+  - ${LUA_ENV} ../../tests/test_python_in_lua.lua
+
+deploy:
+  provider: pypi
+  user: beamerblvd
+  password:
+    # travis encrypt -r OddSource/lunatic-python [password]
+    secure: ecfWU65HQcV2xTdRCVbwxtx9/uIXnIrl+A7qAgRpW8W3Q7vEQxLJWC3QNclHEqHDb9iijQDprkxA0uolRPYk4FkDR2rvIVeW8MJ3uobSIljPIkyqa3DEsHJyZnxYY1n2F2GkunntjiJkn+FSb+KX/lyy2DSKUamxeyLzksSMIgnoOkrSowQRHauJnPo1efaCiBy3sM0g/v0bmR1TJup6r4zieJs2I2y8Z8EB9WgV2/rf/VAqWZFk1/UYm+kuvtnkNTi3+TqbjfSjYERE4wZqrjIzMx4mkvyX+jIDVuqp/XlFQ8Rtv0pb5VPjVD7eATvvab1jctgnE52Zzc0RBR2j/ymSqm6Y962bTkbE5UBa+mLasq8e/y6v+FGGSOrG5YaQHbqmJAO4beETBErEOjkMhntgxBu9Lov2H0UZCl1Qpo/y4akMJzqQiOGIU0BIEUw35K/TQANXXy1RI+9i3hhho/PwSMnCBaHUKBP3QABr7oHbQYcHdPOKDfN86x9oTRLQeUfSd/THVSGbKcxZ/MTc/A72T5gWhcpswzAHBoV+6boJxIaxm8XY8uVDc6sbBLnr2B5RO+NjL16SbSpAdUg6qZUWERoeLRzCbP5yQVkVuI5K6wcKj0/e29Suq/LmfHbESFXm7tLsypvT7th2zM0kkQsNjjW7Yx8sNI9eDoVRSBc=
+  distributions: "sdist"
+  on:
+    tags: true
+    env: LUA_ENV=lua5.2
+    python: '3.6'
