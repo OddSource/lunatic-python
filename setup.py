@@ -96,7 +96,7 @@ print('pkg-config succeeded; ready to compile extensions.\n{}'.format(lua_pkg_co
 
 setup(
     name='lunatic-python-universal',
-    version='2.1.0',
+    version='2.1.1',
     author='Gustavo Niemeyer',
     author_email='gustavo@niemeyer.net',
     description='Two-way bridge between Python and Lua',
